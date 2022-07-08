@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_ui_test/components/bottom_sheet_description.dart';
 import 'package:flutter_ui_test/utils/constant.dart';
 
 class Homepage extends StatelessWidget {
@@ -11,9 +12,10 @@ class Homepage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xff13243E),
       appBar: homepageAppBar(),
+      bottomNavigationBar: bottomNavBar(context),
       body: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24.r),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           color: bgDefaultColor,
         ),
         alignment: Alignment.topCenter,
@@ -59,17 +61,17 @@ class Homepage extends StatelessWidget {
                           );
                         },
                         itemBuilder: (context, index) {
-                          return rowItemQuality();
+                          return rowItemQuality(context);
                         })
                   ],
                 ),
               ),
             ),
-            Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: bottomNavBar(context))
+            // Positioned(
+            //     bottom: 0.0,
+            //     left: 0.0,
+            //     right: 0.0,
+            //     child: bottomNavBar(context))
           ],
         ),
       ),
@@ -104,20 +106,11 @@ class Homepage extends StatelessWidget {
       ),
       height: 112.h,
       color: white,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.r),
-            gradient: gradientBlueDark),
-        child: Text(
-          "Lanjut",
-          style: textStyle1.copyWith(color: white),
-        ),
-      ),
+      child: buttonBlueDark(text: "Lanjut"),
     );
   }
 
-  Container rowItemQuality() {
+  Container rowItemQuality(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -133,7 +126,11 @@ class Homepage extends StatelessWidget {
                 "System IOS",
                 style: textStyle1,
               ),
-              SvgPicture.asset("assets/images/deskripsi 2.svg"),
+              GestureDetector(
+                  onTap: () {
+                    showEditDescription(context);
+                  },
+                  child: SvgPicture.asset("assets/images/deskripsi 2.svg")),
             ],
           ),
           SizedBox(
@@ -142,6 +139,21 @@ class Homepage extends StatelessWidget {
           rowButtonCommand(),
         ],
       ),
+    );
+  }
+
+  showEditDescription(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: BottomSheetDescription(),
+        );
+      },
     );
   }
 
@@ -225,4 +237,20 @@ class Homepage extends StatelessWidget {
       ),
     );
   }
+}
+
+Container buttonBlueDark({
+  required String text,
+  EdgeInsets padding = EdgeInsets.zero,
+}) {
+  return Container(
+    alignment: Alignment.center,
+    padding: padding,
+    decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100.r), gradient: gradientBlueDark),
+    child: Text(
+      text,
+      style: textStyle1.copyWith(color: white),
+    ),
+  );
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const Color white = Colors.white;
+const Color white2 = Color.fromARGB(15, 62, 58, 58);
+const Color bgTextInput = Color(0xffF2F2F2);
 
 const Color red = Color(0xffF24557);
 const Color black = Color(0xff000000);
