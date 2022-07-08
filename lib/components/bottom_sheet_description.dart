@@ -27,15 +27,22 @@ class BottomSheetDescription extends StatelessWidget {
           SizedBox(height: 30.h),
           Text(
             "Keterangan IN",
-            style: textStyle1,
+            style: textStyle1.copyWith(fontSize: 16.sp),
           ),
           SizedBox(
             height: 12.h,
           ),
           Container(
-            color: bgTextInput,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.r),
+              color: bgTextInput,
+            ),
+            padding: EdgeInsets.only(bottom: 40.h),
             child: TextField(
+              cursorColor: Colors.black12,
               decoration: InputDecoration(
+                hintText: "Tambahan Keterangan QC ",
+                hintStyle: TextStyle(color: greyHintTextColor, fontSize: 16.sp),
                 isDense: true,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,

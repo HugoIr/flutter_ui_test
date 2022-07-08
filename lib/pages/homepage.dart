@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_ui_test/components/bottom_sheet_description.dart';
+import 'package:flutter_ui_test/cubits/selected_item/selected_item_cubit.dart';
 import 'package:flutter_ui_test/utils/constant.dart';
 
 class Homepage extends StatelessWidget {
-  const Homepage({Key? key}) : super(key: key);
-
+  Homepage({Key? key}) : super(key: key);
+  List<SelectedItemCubit> selectedItemCubitList = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,60 +21,56 @@ class Homepage extends StatelessWidget {
           color: bgDefaultColor,
         ),
         alignment: Alignment.topCenter,
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.all(24.w),
-                child: Column(
-                  children: [
-                    Text(
-                      "Quality Control IN",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 24.sp,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 12.h,
-                    ),
-                    Text(
-                      "Klik Kotak untuk merubah Kondisi QC",
-                      style: TextStyle(
-                        color: Color(0xff828C97),
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 24.h,
-                    ),
-                    rowButtonAllCommand(),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: 8,
-                        separatorBuilder: (context, index) {
-                          return SizedBox(
-                            height: 16.h,
-                          );
-                        },
-                        itemBuilder: (context, index) {
-                          return rowItemQuality(context);
-                        })
-                  ],
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              children: [
+                Text(
+                  "Quality Control IN",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24.sp,
+                  ),
                 ),
-              ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                Text(
+                  "Klik Kotak untuk merubah Kondisi QC",
+                  style: TextStyle(
+                    color: Color(0xff828C97),
+                    fontSize: 16.sp,
+                  ),
+                ),
+                SizedBox(
+                  height: 24.h,
+                ),
+                rowButtonAllCommand(),
+                SizedBox(
+                  height: 20.h,
+                ),
+                ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: 8,
+                    separatorBuilder: (context, index) {
+                      return SizedBox(
+                        height: 16.h,
+                      );
+                    },
+                    itemBuilder: (context, index) {
+                      SelectedItemCubit selectedItemCubit = SelectedItemCubit();
+                      selectedItemCubitList.add(selectedItemCubit);
+                      return BlocProvider(
+                        create: (context) => selectedItemCubit,
+                        child: rowItemQuality(context),
+                      );
+                    })
+              ],
             ),
-            // Positioned(
-            //     bottom: 0.0,
-            //     left: 0.0,
-            //     right: 0.0,
-            //     child: bottomNavBar(context))
-          ],
+          ),
         ),
       ),
     );
@@ -157,84 +155,188 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Container rowButtonAllCommand() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(1000.r), color: white),
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          headerRowItem(
-            asset: "assets/images/bad.svg",
-            name: "Bad All",
-            fontColor: red,
-          ),
-          headerRowItem(
-            asset: "assets/images/skip.svg",
-            name: "Skip All",
-            fontColor: black,
-          ),
-          headerRowItem(
-            asset: "assets/images/good.svg",
-            name: "Good All",
-            fontColor: green,
-          ),
-        ],
-      ),
+  Widget rowButtonAllCommand() {
+    return BlocProvider(
+      create: (context) => SelectedItemCubit(),
+      child: Builder(builder: (context) {
+        return BlocBuilder<SelectedItemCubit, int>(
+          builder: (context, currentIndex) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(1000.r), color: white),
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  qualityItemAllCommand(
+                    asset: "assets/images/bad.svg",
+                    name: "Bad All",
+                    focusColor: red,
+                    fontColor: red,
+                    currentIndex: currentIndex,
+                    index: 0,
+                  ),
+                  qualityItemAllCommand(
+                    asset: "assets/images/skip.svg",
+                    name: "Skip All",
+                    focusColor: black,
+                    fontColor: black,
+                    currentIndex: currentIndex,
+                    index: 1,
+                  ),
+                  qualityItemAllCommand(
+                    asset: "assets/images/good.svg",
+                    name: "Good All",
+                    focusColor: green,
+                    fontColor: green,
+                    currentIndex: currentIndex,
+                    index: 2,
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 
-  Container rowButtonCommand() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(1000.r), color: bgDefaultColor),
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          headerRowItem(
-            asset: "assets/images/bad.svg",
-            name: "Bad",
-            fontColor: red,
-          ),
-          headerRowItem(
-            asset: "assets/images/skip.svg",
-            name: "Skip",
-            fontColor: black,
-          ),
-          headerRowItem(
-            asset: "assets/images/good.svg",
-            name: "Good",
-            fontColor: green,
-          ),
-        ],
-      ),
-    );
+  Widget rowButtonCommand() {
+    return Builder(builder: (context) {
+      return BlocBuilder<SelectedItemCubit, int>(
+        builder: (context, currentIndex) {
+          print("CURRENTINDEX $currentIndex");
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(1000.r),
+                color: bgDefaultColor),
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                qualityItem(
+                  asset: "assets/images/bad.svg",
+                  name: "Bad",
+                  fontColor: greyTextColor,
+                  focusColor: red,
+                  currentIndex: currentIndex,
+                  index: 0,
+                ),
+                qualityItem(
+                  asset: "assets/images/skip.svg",
+                  name: "Skip",
+                  fontColor: greyTextColor,
+                  focusColor: black,
+                  currentIndex: currentIndex,
+                  index: 1,
+                ),
+                qualityItem(
+                  asset: "assets/images/good.svg",
+                  name: "Good",
+                  fontColor: greyTextColor,
+                  focusColor: green,
+                  currentIndex: currentIndex,
+                  index: 2,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 
-  Widget headerRowItem(
+  Widget qualityItem(
       {required String asset,
       required String name,
-      Color fontColor = Colors.black87}) {
+      required int index,
+      required int currentIndex,
+      required Color focusColor,
+      Color fontColor = greyTextColor}) {
+    return BlocBuilder<SelectedItemCubit, int>(
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            print("index $index");
+            context.read<SelectedItemCubit>().changeSelectedItem(index);
+          },
+          child: qualityItemRaw(
+            name: name,
+            asset: asset,
+            index: index,
+            focusColor: focusColor,
+            currentIndex: currentIndex,
+            fontColor: fontColor,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget qualityItemRaw({
+    required String asset,
+    required String name,
+    required int index,
+    required int currentIndex,
+    required Color focusColor,
+    Color fontColor = Colors.black87,
+    bool isAllCommand = false,
+  }) {
     return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
+      color: (currentIndex == index && !isAllCommand)
+          ? focusColor
+          : Colors.transparent,
       child: Row(
         children: [
           SvgPicture.asset(
             asset,
+            color: (currentIndex == index && !isAllCommand) ? white : null,
           ),
           SizedBox(
             width: 4.w,
           ),
           Text(
             name,
-            style: TextStyle(color: fontColor),
+            style: TextStyle(
+                color: (currentIndex == index && !isAllCommand)
+                    ? white
+                    : fontColor),
           ),
         ],
       ),
+    );
+  }
+
+  Widget qualityItemAllCommand({
+    required String asset,
+    required String name,
+    required int index,
+    required int currentIndex,
+    required Color focusColor,
+    Color fontColor = Colors.black87,
+  }) {
+    return BlocBuilder<SelectedItemCubit, int>(
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            for (SelectedItemCubit selectedItemCubit in selectedItemCubitList) {
+              selectedItemCubit.changeSelectedItem(index);
+            }
+            // context.read<SelectedItemCubit>().c
+          },
+          child: qualityItemRaw(
+            asset: asset,
+            name: name,
+            index: index,
+            currentIndex: currentIndex,
+            focusColor: focusColor,
+            fontColor: fontColor,
+            isAllCommand: true,
+          ),
+        );
+      },
     );
   }
 }
