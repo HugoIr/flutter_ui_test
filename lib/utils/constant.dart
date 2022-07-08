@@ -9,6 +9,7 @@ const Color greyTextColor = Color(0xff828C97);
 
 const Color red = Color(0xffF24557);
 const Color black = Color(0xff000000);
+const Color blackDotColor = Color(0xff13233C);
 const Color green = Color(0xff10BC4F);
 
 const Color fontBlackColor = Color(0xff04192F);

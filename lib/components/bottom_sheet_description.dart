@@ -65,7 +65,6 @@ class BottomSheetDescription extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
-                print("Tapp ${descriptionController.text}");
                 qualityItemCubit
                     .changeQualityItemName(descriptionController.text);
                 Navigator.pop(context);

@@ -3,12 +3,52 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_ui_test/components/bottom_sheet_description.dart';
+import 'package:flutter_ui_test/components/three_dot_loading.dart';
 import 'package:flutter_ui_test/cubits/quality_item/quality_item_cubit.dart';
 import 'package:flutter_ui_test/utils/constant.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   Homepage({Key? key}) : super(key: key);
+
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
   List<QualityItemCubit> qualityItemCubitList = [];
+  ScrollController _scrollController = ScrollController();
+  int maxQualityItemCount = 100;
+  int currentQualityItemCount = 10;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _scrollController.addListener(() async {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        setState(() {
+          isLoading = true;
+        });
+        await Future.delayed(Duration(milliseconds: 1500), () {});
+        if (currentQualityItemCount <= maxQualityItemCount - 10) {
+          setState(() {
+            currentQualityItemCount += 10;
+            isLoading = false;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _scrollController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,9 +62,11 @@ class Homepage extends StatelessWidget {
         ),
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
+          controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.only(
+                left: 24.w, right: 24.w, top: 24.h, bottom: 75.h),
             child: Column(
               children: [
                 Text(
@@ -52,9 +94,10 @@ class Homepage extends StatelessWidget {
                   height: 20.h,
                 ),
                 ListView.separated(
+                    padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: 8,
+                    itemCount: currentQualityItemCount,
                     separatorBuilder: (context, index) {
                       return SizedBox(
                         height: 16.h,
@@ -67,7 +110,11 @@ class Homepage extends StatelessWidget {
                         create: (context) => qualityItemCubit,
                         child: cardItemQuality(context, qualityItemCubit),
                       );
-                    })
+                    }),
+                isLoading
+                    ? Container(
+                        width: 300.w, height: 100.w, child: ThreeDotLoading())
+                    : SizedBox()
               ],
             ),
           ),
@@ -104,7 +151,15 @@ class Homepage extends StatelessWidget {
       ),
       height: 112.h,
       color: white,
-      child: buttonBlueDark(text: "Lanjut"),
+      child: InkWell(
+          onTap: () {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeIn,
+            );
+          },
+          child: buttonBlueDark(text: "Lanjut")),
     );
   }
 
@@ -180,8 +235,6 @@ class Homepage extends StatelessWidget {
       return BlocBuilder<QualityItemCubit, QualityItemState>(
         builder: (context, state) {
           if (state is QualityItemLoaded) {
-            print("CURRENTINDEX ${state.index}");
-
             return Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
@@ -283,7 +336,6 @@ class Homepage extends StatelessWidget {
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
-            print("index $index");
             context.read<QualityItemCubit>().changeQualityItemIndex(index);
           },
           child: qualityItemRaw(
