@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_ui_test/components/bottom_sheet_description.dart';
-import 'package:flutter_ui_test/cubits/selected_item/selected_item_cubit.dart';
+import 'package:flutter_ui_test/cubits/quality_item/quality_item_cubit.dart';
 import 'package:flutter_ui_test/utils/constant.dart';
 
 class Homepage extends StatelessWidget {
   Homepage({Key? key}) : super(key: key);
-  List<SelectedItemCubit> selectedItemCubitList = [];
+  List<QualityItemCubit> qualityItemCubitList = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,11 +61,11 @@ class Homepage extends StatelessWidget {
                       );
                     },
                     itemBuilder: (context, index) {
-                      SelectedItemCubit selectedItemCubit = SelectedItemCubit();
-                      selectedItemCubitList.add(selectedItemCubit);
+                      QualityItemCubit qualityItemCubit = QualityItemCubit();
+                      qualityItemCubitList.add(qualityItemCubit);
                       return BlocProvider(
-                        create: (context) => selectedItemCubit,
-                        child: rowItemQuality(context),
+                        create: (context) => qualityItemCubit,
+                        child: cardItemQuality(context, qualityItemCubit),
                       );
                     })
               ],
@@ -108,7 +108,126 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Container rowItemQuality(BuildContext context) {
+  showEditDescription(
+      BuildContext buildContext, QualityItemCubit qualityItemCubit) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      context: buildContext,
+      builder: (context) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: BottomSheetDescription(qualityItemCubit: qualityItemCubit),
+        );
+      },
+    );
+  }
+
+  Widget rowButtonAllCommand() {
+    return BlocProvider(
+      create: (context) => QualityItemCubit(),
+      child: Builder(builder: (context) {
+        return BlocBuilder<QualityItemCubit, QualityItemState>(
+          builder: (context, state) {
+            if (state is QualityItemLoaded) {
+              return Container(
+                padding: EdgeInsets.all(4.w),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(1000.r), color: white),
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    qualityItemAllCommand(
+                      asset: "assets/images/bad.svg",
+                      name: "Bad All",
+                      focusColor: red,
+                      fontColor: red,
+                      currentIndex: state.index,
+                      index: 0,
+                    ),
+                    qualityItemAllCommand(
+                      asset: "assets/images/skip.svg",
+                      name: "Skip All",
+                      focusColor: black,
+                      fontColor: black,
+                      currentIndex: state.index,
+                      index: 1,
+                    ),
+                    qualityItemAllCommand(
+                      asset: "assets/images/good.svg",
+                      name: "Good All",
+                      focusColor: green,
+                      fontColor: green,
+                      currentIndex: state.index,
+                      index: 2,
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return SizedBox();
+            }
+          },
+        );
+      }),
+    );
+  }
+
+  Widget rowButtonCommand() {
+    return Builder(builder: (context) {
+      return BlocBuilder<QualityItemCubit, QualityItemState>(
+        builder: (context, state) {
+          if (state is QualityItemLoaded) {
+            print("CURRENTINDEX ${state.index}");
+
+            return Container(
+              padding: EdgeInsets.all(4.w),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(1000.r),
+                  color: bgDefaultColor),
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  qualityItem(
+                    asset: "assets/images/bad.svg",
+                    name: "Bad",
+                    fontColor: greyTextColor,
+                    focusColor: red,
+                    currentIndex: state.index,
+                    index: 0,
+                  ),
+                  qualityItem(
+                    asset: "assets/images/skip.svg",
+                    name: "Skip",
+                    fontColor: greyTextColor,
+                    focusColor: black,
+                    currentIndex: state.index,
+                    index: 1,
+                  ),
+                  qualityItem(
+                    asset: "assets/images/good.svg",
+                    name: "Good",
+                    fontColor: greyTextColor,
+                    focusColor: green,
+                    currentIndex: state.index,
+                    index: 2,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return SizedBox();
+          }
+        },
+      );
+    });
+  }
+
+  Container cardItemQuality(
+      BuildContext context, QualityItemCubit qualityItemCubit) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -120,13 +239,26 @@ class Homepage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "System IOS",
-                style: textStyle1,
+              Flexible(
+                child: BlocBuilder<QualityItemCubit, QualityItemState>(
+                  builder: (context, state) {
+                    if (state is QualityItemLoaded) {
+                      return Text(
+                        "${state.name}",
+                        style: textStyle1,
+                      );
+                    } else {
+                      return Text(
+                        "System iOS",
+                        style: textStyle1,
+                      );
+                    }
+                  },
+                ),
               ),
               GestureDetector(
                   onTap: () {
-                    showEditDescription(context);
+                    showEditDescription(context, qualityItemCubit);
                   },
                   child: SvgPicture.asset("assets/images/deskripsi 2.svg")),
             ],
@@ -140,114 +272,6 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  showEditDescription(BuildContext context) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      isDismissible: true,
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: BottomSheetDescription(),
-        );
-      },
-    );
-  }
-
-  Widget rowButtonAllCommand() {
-    return BlocProvider(
-      create: (context) => SelectedItemCubit(),
-      child: Builder(builder: (context) {
-        return BlocBuilder<SelectedItemCubit, int>(
-          builder: (context, currentIndex) {
-            return Container(
-              padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(1000.r), color: white),
-              width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  qualityItemAllCommand(
-                    asset: "assets/images/bad.svg",
-                    name: "Bad All",
-                    focusColor: red,
-                    fontColor: red,
-                    currentIndex: currentIndex,
-                    index: 0,
-                  ),
-                  qualityItemAllCommand(
-                    asset: "assets/images/skip.svg",
-                    name: "Skip All",
-                    focusColor: black,
-                    fontColor: black,
-                    currentIndex: currentIndex,
-                    index: 1,
-                  ),
-                  qualityItemAllCommand(
-                    asset: "assets/images/good.svg",
-                    name: "Good All",
-                    focusColor: green,
-                    fontColor: green,
-                    currentIndex: currentIndex,
-                    index: 2,
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-
-  Widget rowButtonCommand() {
-    return Builder(builder: (context) {
-      return BlocBuilder<SelectedItemCubit, int>(
-        builder: (context, currentIndex) {
-          print("CURRENTINDEX $currentIndex");
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 25.5.w, vertical: 14.h),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(1000.r),
-                color: bgDefaultColor),
-            width: double.infinity,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                qualityItem(
-                  asset: "assets/images/bad.svg",
-                  name: "Bad",
-                  fontColor: greyTextColor,
-                  focusColor: red,
-                  currentIndex: currentIndex,
-                  index: 0,
-                ),
-                qualityItem(
-                  asset: "assets/images/skip.svg",
-                  name: "Skip",
-                  fontColor: greyTextColor,
-                  focusColor: black,
-                  currentIndex: currentIndex,
-                  index: 1,
-                ),
-                qualityItem(
-                  asset: "assets/images/good.svg",
-                  name: "Good",
-                  fontColor: greyTextColor,
-                  focusColor: green,
-                  currentIndex: currentIndex,
-                  index: 2,
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    });
-  }
-
   Widget qualityItem(
       {required String asset,
       required String name,
@@ -255,12 +279,12 @@ class Homepage extends StatelessWidget {
       required int currentIndex,
       required Color focusColor,
       Color fontColor = greyTextColor}) {
-    return BlocBuilder<SelectedItemCubit, int>(
+    return BlocBuilder<QualityItemCubit, QualityItemState>(
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
             print("index $index");
-            context.read<SelectedItemCubit>().changeSelectedItem(index);
+            context.read<QualityItemCubit>().changeQualityItemIndex(index);
           },
           child: qualityItemRaw(
             name: name,
@@ -285,9 +309,14 @@ class Homepage extends StatelessWidget {
     bool isAllCommand = false,
   }) {
     return Container(
-      color: (currentIndex == index && !isAllCommand)
-          ? focusColor
-          : Colors.transparent,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1000.r),
+        color: (currentIndex == index && !isAllCommand)
+            ? focusColor
+            : Colors.transparent,
+      ),
+      padding: EdgeInsets.symmetric(
+          horizontal: isAllCommand ? 21.w : 25.41.w, vertical: 6.h),
       child: Row(
         children: [
           SvgPicture.asset(
@@ -317,14 +346,14 @@ class Homepage extends StatelessWidget {
     required Color focusColor,
     Color fontColor = Colors.black87,
   }) {
-    return BlocBuilder<SelectedItemCubit, int>(
+    return BlocBuilder<QualityItemCubit, QualityItemState>(
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
-            for (SelectedItemCubit selectedItemCubit in selectedItemCubitList) {
-              selectedItemCubit.changeSelectedItem(index);
+            for (QualityItemCubit qualityItemCubit in qualityItemCubitList) {
+              qualityItemCubit.changeQualityItemIndex(index);
             }
-            // context.read<SelectedItemCubit>().c
+            // context.read<QualityItemCubit>().c
           },
           child: qualityItemRaw(
             asset: asset,
