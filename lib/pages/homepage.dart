@@ -125,7 +125,10 @@ class _HomepageState extends State<Homepage> {
 
   AppBar homepageAppBar() {
     return AppBar(
-      title: Text("Quality Control"),
+      title: Text(
+        "Quality Control",
+        style: TextStyle(fontSize: 20.sp),
+      ),
       centerTitle: true,
       toolbarHeight: 82.h,
       backgroundColor: Color(0xff13243E),
@@ -136,6 +139,7 @@ class _HomepageState extends State<Homepage> {
               shape: BoxShape.circle,
               border: Border.all(color: white.withOpacity(0.1), width: 1.w)),
           padding: EdgeInsets.all(12.43.r),
+          margin: EdgeInsets.only(left: 10.w),
           // margin: EdgeInsets.symmetric(horizontal: 10.w),
           child: SvgPicture.asset("assets/images/back.svg")),
     );
